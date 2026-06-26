@@ -15,15 +15,24 @@ Lo que estáis viendo es **markdown colaborativo de verdad**: humanos y agentes 
 
 ### Cómo funciona
 
-```mermaid
-flowchart LR
-    H["👩‍💻 Humano(navegador)"] --&gt;|edita| Y
-    A["🤖 Agente Claude"] --&gt;|"GET / PATCH (If-Match)"| API
-    Y["⚙️ CRDT (Yjs)merge sin conflictos"] &lt;--&gt; API["🌐 Backend MarkCollab"]
-    API --&gt;|"SSE: content_changed,comment_added, chat"| H
-    API --&gt;|"SSE en tiempo real"| A
-    API --- DOC[("📄 Documento .md")]
-    DOC -.-&gt;|push / pull| GH[("🐙 GitHub")]
+```
+        EDITA (navegador)              GET / PATCH (If-Match)
+  Humano  -----------------&gt;  +---------------------+  &lt;-----------------  Agente Claude
+   (UI)                       |   Backend           |                        (REST)
+                              |   MarkCollab        |
+   ^                          |                     |                          ^
+   |   SSE en tiempo real     |  +---------------+  |    SSE en tiempo real    |
+   +------------------------- |  | CRDT (Yjs)    | &lt;---------------------------+
+   content_changed,           |  | merge sin     |  |
+   comment_added, chat        |  | conflictos    |  |
+                              |  +-------+-------+  |
+                              +----------|----------+
+                                         |
+                                    [ Documento .md ]
+                                         |
+                                   push / pull
+                                         |
+                                    [  GitHub  ]
 ```
 
 El humano edita en el navegador y el agente vía REST; el CRDT fusiona ambos sin conflictos y los SSE mantienen a todos sincronizados al instante. Opcionalmente, el documento se sincroniza con GitHub.
